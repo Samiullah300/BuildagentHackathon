@@ -3,40 +3,26 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Follow-Up Ghost 👻 — never drop a commitment again</title>
-<meta name="description" content="Forward any email. Follow-Up Ghost extracts every commitment, emails you before it's due, and closes the loop when you reply DONE." />
+<title>Follow-Up Ghost 👻</title>
 <style>
   :root { --bg:#0d1117; --card:#161b22; --border:#30363d; --fg:#e6edf3;
           --muted:#8b949e; --accent:#a371f7; --red:#f85149; --amber:#d29922; --green:#3fb950; }
   * { box-sizing:border-box; }
   body { margin:0; font-family:system-ui,sans-serif; background:var(--bg); color:var(--fg); }
-  .wrap { max-width:860px; margin:0 auto; padding:24px 16px 64px; }
-  h1 { font-size:1.7rem; margin:0 } h1 span { color:var(--accent); }
-  .tag { color:var(--muted); margin:6px 0 18px; font-size:1.02rem }
-  .pitch { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:10px; margin:14px 0; }
-  .pitch .step { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; font-size:.92rem; line-height:1.45 }
-  .step b { display:block; margin-bottom:4px; color:var(--accent) }
-  .addr { background:var(--card); border:1px dashed var(--accent); border-radius:10px; padding:10px 14px;
-          display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin:14px 0 }
-  .addr code { color:var(--accent); font-size:.95rem }
-  .addr button { background:transparent; border:1px solid var(--border); color:var(--fg); padding:5px 10px; font-size:.8rem }
-  .insights { display:flex; gap:14px; flex-wrap:wrap; margin:6px 0 2px; color:var(--muted); font-size:.86rem }
-  .stats { display:flex; gap:10px; flex-wrap:wrap; margin:14px 0; }
+  .wrap { max-width:820px; margin:0 auto; padding:24px 16px 64px; }
+  h1 { font-size:1.6rem; } h1 span { color:var(--accent); }
+  .stats { display:flex; gap:10px; flex-wrap:wrap; margin:16px 0; }
   .stat { background:var(--card); border:1px solid var(--border); border-radius:10px;
           padding:10px 16px; min-width:100px; }
   .stat b { font-size:1.3rem; display:block; }
   .stat.red b{color:var(--red)} .stat.amber b{color:var(--amber)} .stat.green b{color:var(--green)}
-  .composer { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; }
-  textarea { width:100%; min-height:110px; background:var(--bg); color:var(--fg);
+  textarea { width:100%; min-height:110px; background:var(--card); color:var(--fg);
              border:1px solid var(--border); border-radius:10px; padding:12px; font:inherit; resize:vertical; }
-  input[type=email] { width:100%; margin-top:8px; background:var(--bg); color:var(--fg);
-             border:1px solid var(--border); border-radius:10px; padding:10px 12px; font:inherit }
-  button { cursor:pointer; border:none; border-radius:8px; padding:10px 18px; font-weight:600; font-size:.95rem; }
-  .row { display:flex; gap:10px; margin-top:10px; flex-wrap:wrap }
-  .primary { background:var(--accent); color:#fff; }
-  .ghostbtn { background:transparent; border:1px solid var(--border); color:var(--fg); }
+  button { cursor:pointer; border:none; border-radius:8px; padding:10px 18px;
+           font-weight:600; font-size:.95rem; }
+  .primary { background:var(--accent); color:#fff; margin-top:10px; }
   .primary:disabled { opacity:.5; cursor:wait; }
-  h2 { margin-top:30px; font-size:1.02rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+  h2 { margin-top:32px; font-size:1.05rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
   .card { background:var(--card); border:1px solid var(--border); border-left:4px solid var(--muted);
           border-radius:10px; padding:14px 16px; margin:10px 0; }
   .card.overdue { border-left-color:var(--red); }
@@ -45,57 +31,33 @@
   .task { font-weight:600; }
   .done .task { text-decoration:line-through; }
   .meta { color:var(--muted); font-size:.85rem; margin-top:4px; }
-  .nudge { color:var(--amber); }
   .src { color:var(--muted); font-size:.8rem; font-style:italic; margin-top:6px;
          border-top:1px dashed var(--border); padding-top:6px; }
   .actions { margin-top:8px; display:flex; gap:8px; }
   .actions button { padding:6px 12px; font-size:.8rem; background:var(--border); color:var(--fg); }
   .actions .ok { background:var(--green); color:#04150a; }
   .err { color:var(--red); margin-top:8px; }
-  footer { margin-top:36px; color:var(--muted); font-size:.78rem; border-top:1px solid var(--border); padding-top:14px; }
-  footer a { color:var(--accent) }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Follow-Up <span>Ghost</span> 👻</h1>
-  <p class="tag">Never drop a commitment again. Forward an email — the ghost extracts every promise, nudges you before it's due, and closes the loop when you reply <b>DONE</b>.</p>
+  <p>Paste an email, message, or meeting notes — or just <b>forward any email</b> to
+     <a style="color:var(--accent)" href="mailto:samiullah-4993@agentmail.to">samiullah-4993@agentmail.to</a>.
+     The ghost extracts every commitment, emails you before it's due, and closes the loop when you reply "DONE".</p>
 
-  <div class="pitch">
-    <div class="step"><b>① Sense</b>Forward any email to your ghost's inbox — or paste text below.</div>
-    <div class="step"><b>② Decide</b>AI extracts every commitment: who owes what, by when.</div>
-    <div class="step"><b>③ Act</b>Before a deadline, the ghost emails a personal nudge.</div>
-    <div class="step"><b>④ Verify</b>Reply "DONE" and it closes the loop — zero clicks.</div>
-  </div>
-
-  <div class="addr">
-    <div>📬 <b>Your ghost's inbox:</b> <code id="ghostAddr">samiullah-4993@agentmail.to</code></div>
-    <button onclick="copyAddr()">Copy address</button>
-  </div>
+  <div class="insights" id="insights" style="display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 4px;color:var(--muted);font-size:.85rem"></div>
 
   <div class="stats" id="stats"></div>
-  <div class="insights" id="insights"></div>
 
-  <h2>Track something</h2>
-  <div class="composer">
-    <textarea id="input" placeholder='Paste an email, Slack message, or meeting notes… e.g. "Hey Sami, can you send me the Q3 report by Thursday? I will review the budget draft and get back to you Friday."'></textarea>
-    <input id="email" type="email" placeholder="your@email.com — nudge emails go here (saved in this browser)" />
-    <div class="row">
-      <button class="primary" id="extractBtn" onclick="extract()">Extract commitments</button>
-      <button class="ghostbtn" onclick="trySample()">✨ Try a sample</button>
-    </div>
-    <div class="err" id="err"></div>
-  </div>
+  <textarea id="input" placeholder='e.g. "Hey Sami, can you send me the Q3 report by Thursday? I will review the budget draft and get back to you Friday."'></textarea>
+  <input id="email" type="email" placeholder="your@email.com — nudge emails go here (saved in this browser)"
+         style="width:100%;margin-top:8px;background:var(--card);color:var(--fg);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font:inherit" />
+  <button class="primary" id="extractBtn" onclick="extract()">Extract commitments</button>
+  <div class="err" id="err"></div>
 
   <h2>Commitments</h2>
   <div id="list"></div>
-
-  <footer>
-    Built for the "Build an Agent" Hackathon with
-    <b>Agent37</b> (AI extraction + nudge drafting), <b>InstaCloud</b> (hosting, Postgres, cron)
-    and <b>Monid</b> (AgentMail email + demo video).
-    <a href="https://github.com/Samiullah300/BuildagentHackathon">Source</a> · MIT
-  </footer>
 </div>
 
 <script>
@@ -134,10 +96,9 @@ async function load() {
     const due = dstr(c.due_date);
     const done = c.status === 'completed';
     const cls = done ? 'done' : due && due < today ? 'overdue' : due && due <= addDays(today, 3) ? 'soon' : '';
-    const nudges = (c.nudge_count || 0) > 0 ? ` · <span class="nudge">👻 nudged ${c.nudge_count}×</span>` : '';
     return `<div class="card ${cls}">
       <div class="task">${esc(c.task)}</div>
-      <div class="meta">👤 ${esc(c.owner)}${c.owner_email ? ` &lt;<a style="color:var(--accent)" href="mailto:${esc(c.owner_email)}">${esc(c.owner_email)}</a>&gt;` : ''} ${due ? '· 📅 ' + due : '· no deadline'}${nudges}
+      <div class="meta">👤 ${esc(c.owner)}${c.owner_email ? ` &lt;<a style="color:var(--accent)" href="mailto:${esc(c.owner_email)}">${esc(c.owner_email)}</a>&gt;` : ''} ${due ? '· 📅 ' + due : '· no deadline'}
         ${!done && due && due < today ? '· <b style="color:var(--red)">OVERDUE</b>' : ''}</div>
       ${c.source_text ? `<div class="src">“${esc(c.source_text)}”</div>` : ''}
       <div class="actions">
@@ -145,7 +106,7 @@ async function load() {
         <button onclick="del(${c.id})">Delete</button>
       </div>
     </div>`;
-  }).join('') || '<p style="color:var(--muted)">Nothing tracked yet. The ghost is bored — forward it an email.</p>';
+  }).join('') || '<p style="color:var(--muted)">Nothing tracked yet. The ghost is bored.</p>';
   loadStats();
 }
 
@@ -174,17 +135,6 @@ async function extract() {
   finally { btn.disabled = false; btn.textContent = 'Extract commitments'; }
 }
 
-function trySample() {
-  document.getElementById('input').value =
-    `From: priya@acmecorp.com\nHey Sami — please send me the final pitch deck by Friday. I'll share the investor list with you by tomorrow. Also Marcus said he'll review the term sheet before our Monday board call.`;
-  document.getElementById('input').focus();
-}
-
-function copyAddr() {
-  navigator.clipboard.writeText(document.getElementById('ghostAddr').textContent)
-    .then(() => { const b = event.target; b.textContent = 'Copied!'; setTimeout(() => b.textContent = 'Copy address', 1200); });
-}
-
 async function complete(id) {
   await api(`/api/commitments/${id}/complete`, { method: 'POST' });
   load();
@@ -196,5 +146,5 @@ async function del(id) {
 document.getElementById('email').value = localStorage.getItem('ghost_email') || '';
 load();
 </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a470386c6bf021bd',t:'MTc5MTQxMDg2NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
