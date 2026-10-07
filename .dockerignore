@@ -1,0 +1,7 @@
+node_modules
+.env
+.insta/agent-session.json
+.insta/observe/
+.insta/audit.jsonl
+.git
+npm-debug.log
