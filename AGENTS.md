@@ -79,7 +79,9 @@ This project uses **3 sponsors** (exceeds requirement of Agent37 + 1):
 | `POST` | `/api/commitments/:id/complete` | Mark complete |
 | `DELETE` | `/api/commitments/:id` | Delete commitment |
 | `GET` | `/api/stats` | Get statistics |
-| `POST` | `/api/nudge-check` | Cron target: due/overdue list + notify email |
+| `GET` | `/api/insights` | Completion rate, nudges sent, most-tracked owner |
+| `POST` | `/api/nudge-check` | Cron: Agent37 drafts + sends nudge emails (idempotent) |
+| `POST` | `/api/check-inbox` | Cron: poll inbox → extract commitments / close on reply |
 
 ## Database Schema
 
@@ -106,6 +108,8 @@ Schema changes are tracked as files in `migrations/` (InstaCloud never merges da
 | `DATABASE_URL` | PostgreSQL connection string | Yes (bound from `postgres/main-db`) |
 | `AGENT37_URL` | Agent37 instance URL | Yes (`https://donch9fjsj.agent37.app`) |
 | `AGENT37_KEY` | Agent37 API key | Yes |
+| `AGENTMAIL_KEY` | AgentMail API key | Yes (for send + inbox polling) |
+| `AGENTMAIL_INBOX` | Ghost's inbox address | Yes (`samiullah-4993@agentmail.to`) |
 | `NOTIFY_EMAIL` | Default nudge recipient | No (default: samiullah1yousufi@gmail.com) |
 | `PORT` | Server port | No (default: 3000) |
 
@@ -168,17 +172,19 @@ The AI is prompted to extract a **JSON array** (one message usually holds severa
 - **due_date**: YYYY-MM-DD, relative dates resolved against today
 - **source_text**: Original text snippet
 
-### Email Nudge Flow
+### The Autonomous Loop (live)
 
-1. InstaCloud cron POSTs `/api/nudge-check` daily → returns due/overdue commitments + `notify_email`.
-2. The Agent37 agent formats friendly reminder emails (one per recipient, grouped) and sends them via **AgentMail through Monid**: `monid run -p agentmail -e /send-messages -i '{"inboxId":"followupghost@agentmail.to","to":...,"subject":...,"text":...}'`.
-3. The repo ships `npm run monid -- <args>` (`scripts/monid-run.sh`) so the agent's sandboxed shell can reach the Monid CLI despite its install block.
+The ghost is a fully autonomous agent — **sense → decide → act → verify**:
 
-**One-time setup** (costs $1 from Monid balance): `monid run -p agentmail -e /create-inboxes -i '{"username":"followupghost","displayName":"Follow-Up Ghost"}'`.
+1. **Sense (email-in):** InstaCloud cron `inbox-poll` (`*/15 * * * *`) POSTs `/api/check-inbox` → server lists unread mail at the ghost's AgentMail inbox (`samiullah-4993@agentmail.to`, display name "Follow-Up Ghost") → Agent37 extracts commitments from each new message (deduped via the `seen_messages` table). **Forward any email to that address and its commitments appear on the dashboard within 15 minutes.**
+2. **Decide + Act (nudges):** InstaCloud cron `daily-nudge` (`0 13 * * *`) POSTs `/api/nudge-check` → for every due/overdue commitment not already nudged today, **Agent37 drafts a personal reminder email** (subject starts "Reminder: …") and the server sends it through AgentMail (`POST /v0/inboxes/{id}/messages/send`), then stamps `nudged_at`/`nudge_count` so it never double-sends.
+3. **Verify (reply-to-close):** When someone replies `Re: Reminder: <task>` with "done", the next `inbox-poll` run matches the subject to the open commitment, Agent37 classifies the intent, and the commitment is auto-completed. **Zero manual clicks.**
+
+Env: `AGENTMAIL_KEY` + `AGENTMAIL_INBOX` secrets (bound to compute). `NOTIFY_EMAIL` is the fallback recipient when a commitment has no owner email.
 
 ### Demo Video (Monid)
 
-The 2-minute demo video is AI-generated through Monid (text-to-video, e.g. Kling / Wan) and hosted via Monid **sfs** (`/put` + `/cat`, 7-day signed URL) — link is in the submission.
+The 2-minute demo video is AI-generated through Monid (Kling text-to-video + ElevenLabs ghost-voice narration) and hosted via Monid **sfs** (`/put` + `/cat`, 7-day signed URL) — link is in the submission.
 
 ### Demo Flow
 

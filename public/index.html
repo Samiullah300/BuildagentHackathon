@@ -42,7 +42,11 @@
 <body>
 <div class="wrap">
   <h1>Follow-Up <span>Ghost</span> 👻</h1>
-  <p>Paste a Slack message, email, or meeting notes. The ghost extracts every commitment and haunts it until done.</p>
+  <p>Paste an email, message, or meeting notes — or just <b>forward any email</b> to
+     <a style="color:var(--accent)" href="mailto:samiullah-4993@agentmail.to">samiullah-4993@agentmail.to</a>.
+     The ghost extracts every commitment, emails you before it's due, and closes the loop when you reply "DONE".</p>
+
+  <div class="insights" id="insights" style="display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 4px;color:var(--muted);font-size:.85rem"></div>
 
   <div class="stats" id="stats"></div>
 
@@ -74,6 +78,15 @@ async function loadStats() {
     <div class="stat red"><b>${s.overdue}</b>Overdue</div>
     <div class="stat amber"><b>${s.due_soon}</b>Due soon</div>
     <div class="stat green"><b>${s.completed}</b>Completed</div>`;
+  try {
+    const i = await api('/api/insights');
+    if (i.total) {
+      document.getElementById('insights').innerHTML =
+        `👻 <b style="color:var(--accent)">${i.completion_rate ?? 0}%</b> completion rate` +
+        ` · <b>${i.nudges_sent}</b> nudge emails sent` +
+        (i.most_tracked_owner ? ` · most tracked: <b>${esc(i.most_tracked_owner)}</b>` : '');
+    }
+  } catch {}
 }
 
 async function load() {
