@@ -30,6 +30,9 @@ async function initDb() {
       completed_at TIMESTAMP
     );
   `);
+  await pool.query(
+    `ALTER TABLE commitments ADD COLUMN IF NOT EXISTS owner_email VARCHAR(320)`
+  );
   console.log('DB ready');
 }
 
@@ -71,6 +74,9 @@ function parseCommitments(raw) {
     .map((c) => ({
       task: c.task.trim(),
       owner: String(c.owner || 'you').trim() || 'you',
+      owner_email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.owner_email || '')
+        ? c.owner_email
+        : null,
       due_date: /^\d{4}-\d{2}-\d{2}$/.test(c.due_date) ? c.due_date : null,
       source_text: String(c.source_text || '').slice(0, 1000),
     }));
@@ -80,7 +86,7 @@ function parseCommitments(raw) {
 app.get('/health', (req, res) => res.json({ ok: true, service: 'follow-up-ghost' }));
 
 app.post('/api/extract', asyncRoute(async (req, res) => {
-  const { text } = req.body || {};
+  const { text, default_email: defaultEmail } = req.body || {};
   if (!text || !text.trim()) return res.status(400).json({ error: 'text is required' });
   if (!AGENT37_URL || !AGENT37_KEY) {
     return res.status(500).json({ error: 'AGENT37_URL / AGENT37_KEY not configured' });
@@ -90,7 +96,7 @@ app.post('/api/extract', asyncRoute(async (req, res) => {
   const prompt = `You are a commitment extraction engine. Today's date is ${today}.
 Extract every actionable commitment (something someone promised or was asked to do) from the text below.
 Return ONLY a JSON array, no markdown, no commentary. Each element:
-{"task":"what must be done","owner":"who is responsible","due_date":"YYYY-MM-DD or null","source_text":"the exact snippet it came from"}
+{"task":"what must be done","owner":"who is responsible","owner_email":"email address of the owner if mentioned, else null","due_date":"YYYY-MM-DD or null","source_text":"the exact snippet it came from"}
 Rules:
 - Resolve relative dates ("by Thursday", "EOD Friday", "next week") against ${today}.
 - If the commitment is directed at the reader, owner is "you".
@@ -115,12 +121,15 @@ ${text}
   }
 
   const commitments = parseCommitments(extractText(await r.json()));
+  const fallbackEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(defaultEmail || '')
+    ? defaultEmail
+    : null;
   const inserted = [];
   for (const c of commitments) {
     const { rows } = await pool.query(
-      `INSERT INTO commitments (task, owner, due_date, source_text)
-       VALUES ($1, $2, $3, $4) RETURNING *`,
-      [c.task, c.owner, c.due_date, c.source_text]
+      `INSERT INTO commitments (task, owner, owner_email, due_date, source_text)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [c.task, c.owner, c.owner_email || fallbackEmail, c.due_date, c.source_text]
     );
     inserted.push(rows[0]);
   }
@@ -176,17 +185,24 @@ app.get('/api/stats', asyncRoute(async (req, res) => {
   res.json(rows[0]);
 }));
 
-// Hit daily by the Agent37 cron job — returns everything that needs a nudge.
+// Hit daily by the InstaCloud cron job. Returns everything needing a nudge;
+// when NOTIFY_EMAIL is set, the Agent37 agent turns it into reminder emails
+// sent through AgentMail (Monid).
 app.post('/api/nudge-check', asyncRoute(async (req, res) => {
   const { rows } = await pool.query(
-    `SELECT id, task, owner, due_date,
+    `SELECT id, task, owner, owner_email, due_date,
             (due_date < CURRENT_DATE) AS overdue
      FROM commitments
      WHERE status = 'pending' AND due_date <= CURRENT_DATE + INTERVAL '1 day'
      ORDER BY due_date ASC`
   );
   console.log(`[nudge] ${rows.length} commitment(s) need follow-up`);
-  res.json({ nudges: rows.length, commitments: rows });
+  res.json({
+    nudges: rows.length,
+    commitments: rows,
+    notify_email: process.env.NOTIFY_EMAIL || null,
+    app_url: process.env.APP_URL || null,
+  });
 }));
 
 // ---- Boot ---------------------------------------------------------------

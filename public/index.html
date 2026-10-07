@@ -47,6 +47,8 @@
   <div class="stats" id="stats"></div>
 
   <textarea id="input" placeholder='e.g. "Hey Sami, can you send me the Q3 report by Thursday? I will review the budget draft and get back to you Friday."'></textarea>
+  <input id="email" type="email" placeholder="your@email.com — nudge emails go here (saved in this browser)"
+         style="width:100%;margin-top:8px;background:var(--card);color:var(--fg);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font:inherit" />
   <button class="primary" id="extractBtn" onclick="extract()">Extract commitments</button>
   <div class="err" id="err"></div>
 
@@ -83,7 +85,7 @@ async function load() {
     const cls = done ? 'done' : due && due < today ? 'overdue' : due && due <= addDays(today, 3) ? 'soon' : '';
     return `<div class="card ${cls}">
       <div class="task">${esc(c.task)}</div>
-      <div class="meta">👤 ${esc(c.owner)} ${due ? '· 📅 ' + due : '· no deadline'}
+      <div class="meta">👤 ${esc(c.owner)}${c.owner_email ? ` &lt;<a style="color:var(--accent)" href="mailto:${esc(c.owner_email)}">${esc(c.owner_email)}</a>&gt;` : ''} ${due ? '· 📅 ' + due : '· no deadline'}
         ${!done && due && due < today ? '· <b style="color:var(--red)">OVERDUE</b>' : ''}</div>
       ${c.source_text ? `<div class="src">“${esc(c.source_text)}”</div>` : ''}
       <div class="actions">
@@ -106,10 +108,12 @@ async function extract() {
   err.textContent = ''; btn.disabled = true; btn.textContent = 'Ghost is reading…';
   try {
     const text = document.getElementById('input').value;
+    const default_email = document.getElementById('email').value.trim() || null;
+    if (default_email) localStorage.setItem('ghost_email', default_email);
     const r = await api('/api/extract', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ text, default_email }),
     });
     if (!r.extracted) err.textContent = 'No commitments found in that text.';
     document.getElementById('input').value = '';
@@ -126,6 +130,7 @@ async function del(id) {
   await api(`/api/commitments/${id}`, { method: 'DELETE' });
   load();
 }
+document.getElementById('email').value = localStorage.getItem('ghost_email') || '';
 load();
 </script>
 </body>
